@@ -18,7 +18,7 @@ public class Main {
 
         // Start a server which will listen to connector registrations on a websocket
         var registrationServer = MuServerBuilder.muServer()
-                .withHttpsPort(8444)
+                .withHttpPort(8444)
                 .addHandler(router.createRegistrationHandler())
                 .start();
 
