@@ -24,7 +24,7 @@ public class Main {
 
         // Start the server that clients will send HTTP requests to
         var httpServer = MuServerBuilder.muServer()
-                .withHttpsPort(Integer.parseInt(System.getenv("PORT")))
+                .withHttpPort(Integer.parseInt(System.getenv("PORT")))
                 .addHandler(router.createHttpHandler())
                 .start();
 
