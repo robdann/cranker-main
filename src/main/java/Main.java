@@ -1,10 +1,12 @@
 import com.hsbc.cranker.connector.CrankerConnectorBuilder;
+import com.hsbc.cranker.connector.ProxyEventListener;
 import com.hsbc.cranker.mucranker.CrankerRouterBuilder;
 import io.muserver.MuServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.net.http.HttpRequest;
 import java.time.Duration;
 
 public class Main {
@@ -38,6 +40,12 @@ public class Main {
             log.info("Starting catchAll connector pointing to {}", catchAll);
             CrankerConnectorBuilder.connector()
                     .withRoute("*")
+                    .withProxyEventListener(new ProxyEventListener() {
+                        @Override
+                        public HttpRequest beforeProxyToTarget(HttpRequest request, HttpRequest.Builder requestBuilder) {
+                            return requestBuilder.timeout(Duration.ofSeconds(10)).build();
+                        }
+                    })
                     .withTarget(URI.create(catchAll))
                     .withRouterLookupByDNS(URI.create("ws://localhost:%s".formatted(registrationServer.uri().getPort())))
                     .start();
