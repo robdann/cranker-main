@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.time.Duration;
 
 public class Main {
 
@@ -14,6 +15,7 @@ public class Main {
 
         // Use the mucranker library to create a router object - this creates handlers
         var router = CrankerRouterBuilder.crankerRouter()
+                .withConnectorMaxWaitInMillis(Duration.ofSeconds(10).toMillis())
                 .start();
 
         // Start a server which will listen to connector registrations on a websocket
