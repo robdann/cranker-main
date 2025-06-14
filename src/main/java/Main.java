@@ -27,15 +27,11 @@ public class Main {
                 .start();
 
         // Start the server that clients will send HTTP requests to
-        var httpServer = MuServerBuilder.muServer()
-                .withHttpPort(Integer.parseInt(System.getenv("PORT")))
-                .addHandler(router.createHttpHandler())
-                .start();
+        var httpServerBuilder = MuServerBuilder.muServer()
+                .withHttpPort(Integer.parseInt(System.getProperty("port", System.getenv("PORT"))))
+                .addHandler(router.createHttpHandler());
 
-        System.out.println("Cranker is available at " + httpServer.uri() +
-                " with registration at " + registrationServer.uri());
-
-        var catchAll = System.getenv("CATCH_ALL_URL");
+        var catchAll = System.getProperty("catch.all.url", System.getenv("CATCH_ALL_URL"));
         if (catchAll != null) {
             log.info("Starting catchAll connector pointing to {}", catchAll);
             CrankerConnectorBuilder.connector()
@@ -45,10 +41,20 @@ public class Main {
                         public HttpRequest beforeProxyToTarget(HttpRequest request, HttpRequest.Builder requestBuilder) {
                             return requestBuilder.timeout(Duration.ofSeconds(10)).build();
                         }
+
+                        @Override
+                        public void onProxyError(HttpRequest request, Throwable error) {
+                            log.error("Proxy error", error);
+                        }
                     })
                     .withTarget(URI.create(catchAll))
                     .withRouterLookupByDNS(URI.create("ws://localhost:%s".formatted(registrationServer.uri().getPort())))
                     .start();
         }
+        var httpServer = httpServerBuilder.start();
+        System.out.println("Cranker is available at " + httpServer.uri() +
+                " with registration at " + registrationServer.uri());
+
+
     }
 }
